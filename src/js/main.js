@@ -37,11 +37,8 @@ const video = app.querySelector('video'),
 			ctx = canvas.getContext('2d'),
 			drawUtils = new DrawingUtils(ctx);
 
-const bufferSize = 5,
-			leftGestureBuffer = new FixedSizeArray( bufferSize ),
-			rightGestureBuffer = new FixedSizeArray( bufferSize ),
-			leftGestureHistory = new FixedSizeArray( 2 ),
-			rightGestureHistory = new FixedSizeArray( 2 );
+const gestureBuffer = new FixedSizeArray( 5 ),
+			gestureHistory = new FixedSizeArray( 2 );
 
 let lastVideoTime = -1;
 const output = app.querySelector('#output');
@@ -85,17 +82,14 @@ function initWithoutWebcam () {
 
 function handleGestureChange () {
 
-	const histLeft = leftGestureHistory.items,
-				histRight = rightGestureHistory.items;
-
-	const lastTwoDiffHands = [ histLeft.at(-1), histRight.at(-1) ],
-				lastTwoLeft = histLeft,
-				lastTwoRight = histRight,
+	const lastTwoDiffHands = Object.values( gestureHistory.items.at(-1) ),
+				lastTwoLeft = [ gestureHistory.items.at(-1)?.left, gestureHistory.items.at(-2)?.left ],
+				lastTwoRight = [ gestureHistory.items.at(-1)?.right, gestureHistory.items.at(-2)?.right ],
 				checkOrder = [ lastTwoDiffHands, lastTwoLeft, lastTwoRight ];
 
 	const anyIsMF = lastTwoDiffHands.some(v => v && v.categoryName === 'Middle_Finger');
 
-	console.log( checkOrder );
+	// console.log( checkOrder );
 				
 	for (const combination of checkOrder) {
 		
@@ -129,85 +123,89 @@ async function predictVideo () {
 
 	output.innerHTML = '';
 
-	if ( numHands > 0 ) for (let i = 0; numHands > i; i++) {
+	if ( numHands > 0 ) {
 
-		let handedness = detections.handednesses[i][0],
-				gesture = detections.gestures[i][0],
-				landmarks = detections.landmarks[i],
-				worldLandmarks = detections.worldLandmarks[i];
+		let nextInHistory = {
+			left: null,
+			right: null
+		};
 
-		if (gesture.categoryName == 'None') {
-			let custom = customGestureRecognition( worldLandmarks );
-			if (custom !== 'None') gesture = { 
-				isCustom: true,
-				categoryName: custom 
+		for (let i = 0; numHands > i; i++) {
+	
+			let handedness = detections.handednesses[i][0],
+					gesture = detections.gestures[i][0],
+					landmarks = detections.landmarks[i],
+					worldLandmarks = detections.worldLandmarks[i];
+	
+			if (gesture.categoryName == 'None') {
+				let custom = customGestureRecognition( worldLandmarks );
+				if (custom !== 'None') gesture = { 
+					isCustom: true,
+					categoryName: custom 
+				}
 			}
-		}
-		
-		// if (debug) console.log({
-		// 	handedness,
-		// 	gesture,
-		// 	landmarks,
-		// 	worldLandmarks,
+			
+			// if (debug) console.log({
+			// 	handedness,
+			// 	gesture,
+			// 	landmarks,
+			// 	worldLandmarks,
+			// });
+	
+			switch (handedness.categoryName) {
+	
+				case 'Left':
+					nextInHistory.left = gesture;
+					break;
+	
+				case 'Right':
+					nextInHistory.right = gesture;
+					break;
+			}
+	
+			drawUtils.drawConnectors(
+				landmarks, 
+				GestureRecognizer.HAND_CONNECTIONS, 
+				{
+					color: "#00FF00",
+					lineWidth: 5
+				}
+			);
+	
+			drawUtils.drawLandmarks(
+				landmarks, 
+				{
+					color: '#FF0000',
+					lineWidth: 2,
+				}
+			);
+			
+			output.innerHTML += `${handedness.categoryName}: ${gesture.categoryName}<br />`;
+	
+		} 
+
+		gestureBuffer.push( nextInHistory );
+
+		let lastCategories = Object.values( gestureHistory.items.at(-1) || {} ).map( g => g?.categoryName ),
+				nextCategories = Object.values( nextInHistory ).map( g => g?.categoryName ),
+				lastIsEqual = isEqual( lastCategories, nextCategories ),
+				bufferIsFullOfEqual = gestureBuffer.every( prev => 
+					isEqual( prev?.left?.categoryName, nextInHistory.left?.categoryName ) &&
+					isEqual( prev?.right?.categoryName, nextInHistory.right?.categoryName )
+				);
+
+		// console.log({
+		// 	buffer: gestureBuffer.items,
+		// 	next: nextInHistory,
+		// 	// lastCategories,
+		// 	// lastIsEqual,
+		// 	// bufferIsFullOfEqual,
 		// });
 
-		let lastInHistory,
-				lastInHistoryIsEqual,
-				bufferIsFullOfEqual;
-
-		switch (handedness.categoryName) {
-
-			case 'Left':
-
-				leftGestureBuffer.push( gesture );
-				
-				lastInHistory = leftGestureHistory.items.at(-1);
-				lastInHistoryIsEqual = (lastInHistory?.categoryName ?? 'undefined') == gesture.categoryName;
-				bufferIsFullOfEqual = leftGestureBuffer.every( v => v && v.categoryName === gesture.categoryName );
-				
-				if ( bufferIsFullOfEqual && !lastInHistoryIsEqual ) {
-					leftGestureHistory.push(gesture);
-					rightGestureHistory.push(null);
-					handleGestureChange();
-				}
-
-				break;
-
-			default:
-
-				rightGestureBuffer.push( gesture );
-
-				lastInHistory = rightGestureHistory.items.at(-1);
-				lastInHistoryIsEqual = (lastInHistory?.categoryName ?? 'undefined') == gesture.categoryName;
-				bufferIsFullOfEqual = rightGestureBuffer.every( v => v && v.categoryName === gesture.categoryName );
-				
-				if ( bufferIsFullOfEqual && !lastInHistoryIsEqual ) {
-					leftGestureHistory.push(null);
-					rightGestureHistory.push(gesture);
-					handleGestureChange()
-				}
-
-				break;
+		if ( bufferIsFullOfEqual && !lastIsEqual ) {
+			gestureHistory.push( nextInHistory );
+			handleGestureChange();
 		}
-
-		drawUtils.drawConnectors(
-			landmarks, 
-			GestureRecognizer.HAND_CONNECTIONS, 
-			{
-				color: "#00FF00",
-				lineWidth: 5
-			}
-		);
-
-		drawUtils.drawLandmarks(
-			landmarks, 
-			{
-				color: '#FF0000',
-				lineWidth: 2,
-			}
-		);
-		
-		output.innerHTML += `${handedness.categoryName}: ${gesture.categoryName}<br />`;
 
 	} 
 
