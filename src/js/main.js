@@ -1,4 +1,6 @@
 import 'normalize.css';
+import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
+import '@fortawesome/fontawesome-free/css/solid.min.css';
 import '../css/global.scss';
 
 import { ready, loaded } from './LoadEvents';
@@ -22,6 +24,7 @@ await ready();
 	const html = document.querySelector('html');
 
 	html.classList.add('ready');
+	html.classList.add('loading');
 	loaded().then(() => html.classList.add('loaded'));
 
 	const body = html.querySelector('body'),
@@ -45,12 +48,15 @@ await ready();
 
 // --- PREDICTIONS --- //
 
+	let predictionsRunning = false; 
+
 	const gestureBuffer = new FixedSizeArray( 5 ),
-				gestureHistory = new FixedSizeArray( 2 );
+				gestureHistory = new FixedSizeArray( 2 ),
+				video = app.querySelector('video');
 
-	const video = app.querySelector('video');
+	function predictVideo () {
 
-	async function predictVideo () {
+		if (!predictionsRunning) return; 
 
 		const now = performance.now(),
 					detections = recognizer.recognizeForVideo( video, now ),
@@ -59,12 +65,6 @@ await ready();
 		html.classList.toggle('no-detections', !hasDetections);
 
 		if ( hasDetections ) {
-
-			// console.log({
-			// 	normal: detections.landmarks[0][0].x,
-			// 	world: detections.worldLandmarks[0][0].x 
-			// });
-
 			handleDetections( detections );
 			// handle2D( detections );
 			handle3D( detections );
@@ -290,7 +290,7 @@ await ready();
 				z: ((bbox.back - bbox.front) / 2) + bbox.front,
 			};
 
-			console.log(bbox, center);
+			// console.log(bbox, center);
 			
 			const hand = detections.worldLandmarks[0];
 
@@ -314,14 +314,12 @@ await ready();
 
 			}
 
-			
-
 			const tScale = 50,
 						tX = THREE.MathUtils.mapLinear( center.x, 0, 1, width * 0.5, width * -0.5 ) / tScale,
 						tY = THREE.MathUtils.mapLinear( center.y, 0, 1, height * 0.5, height * -0.5 ) / tScale,
-						tZ = 1 || THREE.MathUtils.mapLinear( center.z, 0, 0.75, cameraPosition.z * -0.25, cameraPosition.z * 0.75); // TODO: GET THIS TO WORK
+						tZ = THREE.MathUtils.mapLinear( center.z, 0, 0.5, cameraPosition.z * -1, cameraPosition.z); 
 			
-			console.log({ tX, tY, tZ });
+			// console.log({ tX, tY, tZ });
 
 			spheres.translateX( tX );
 			spheres.translateY( tY );
@@ -345,48 +343,84 @@ await ready();
 
 // --- INIT --- //
 
-	if ( !!navigator.mediaDevices?.getUserMedia ) {
-		navigator.mediaDevices
-			.getUserMedia({ video: true, audio: false })
-			.then(stream => initWithWebcam(stream))
-			.catch(err => {
-				console.error(`An error occurred: ${err}`);
-				initWithoutWebcam();
-			});
-	} else {
-		console.warn("getUserMedia() is not supported by your browser");
-		initWithoutWebcam();
+	let stream = null;
+
+	let useCamera = false;
+	
+	const useCameraCheck = app.querySelector('#use-camera');
+	useCameraCheck.checked = false;
+
+	switchVideoSource();
+	useCameraCheck.onchange = evt => {
+		const { checked } = evt.target;
+		console.log('useCameraCheck', checked);
+		useCamera = checked;
+		switchVideoSource();
 	}
 
-	function initWithWebcam (stream) {
+	function switchVideoSource () {
 
-		if (debug) console.debug('initWithWebcam');
+		html.classList.add('loading');
+		predictionsRunning = false;
+		video.pause();
 
+		if (
+			navigator.mediaDevices && 
+			'getUserMedia' in navigator.mediaDevices
+		) {
+
+			if (useCamera) {
+				
+				navigator.mediaDevices
+					.getUserMedia({ video: true })
+					.then(str => {
+						console.warn('got stream', str);
+						initStream(str);
+					})
+					.catch(err => {
+						console.error(err);
+						initWithoutStream();
+					});
+
+			} else initWithoutStream();
+
+
+		} else {
+
+			console.warn("getUserMedia() is not supported by your browser");
+			html.classList.add('no-user-media');
+			initWithoutStream();
+
+		}
+
+		video.onloadeddata = evt => {
+			predictionsRunning = true;
+			predictVideo();
+			html.classList.remove('loading');
+		}
+
+	}
+
+	function initStream (s) {
+
+		stream = s;
+
+		video.src = null;
 		video.srcObject = stream;
+
 		video.play();
-
-		video.onloadeddata = evt => {
-			resizeCanvas();
-			predictVideo();
-		}
-
+		
 	}
-
-	function initWithoutWebcam () {
-
-		if (debug) console.debug('initWithoutWebcam');
-
-		video.autoplay = true;
-		video.muted = true;
+	
+	function initWithoutStream () {
+		
 		video.loop = true;
+		video.muted = true;
 
+		video.srcObject = null;
 		video.src = 'video.mp4';
+		
 		video.play();
-
-		video.onloadeddata = evt => {
-			resizeCanvas();
-			predictVideo();
-		}
 
 	}
 

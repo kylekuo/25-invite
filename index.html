@@ -9,13 +9,24 @@
   <body>
     <div id="app">
 
-      <div id="permission">awaiting permission</div>
+      <div id="loading">
+        <i class="fa-solid fa-spinner"></i>
+      </div>
 
       <div id="video">
         <video></video>
         <canvas id="two_d"></canvas>
         <canvas id="three_d"></canvas>
       </div>
+
+      <form id="options">
+        <label>
+          <input type="checkbox" name="use-camera" id="use-camera">
+          <span class="label">
+            <i class="fa-solid fa-video"></i>
+          </span>
+        </select>
+      </form>
 
     </div>
     <script type="module" src="src/js/main.js"></script>
