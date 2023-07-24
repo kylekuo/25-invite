@@ -92,4 +92,28 @@ export default class HandLandmarks {
 		this.PINKY_MCP,
 	];
 
+	static ALL = [
+		this.WRIST,
+		this.THUMB_CMC,
+		this.THUMB_MCP,
+		this.THUMB_IP,
+		this.THUMB_TIP,
+		this.INDEX_FINGER_MCP,
+		this.INDEX_FINGER_PIP,
+		this.INDEX_FINGER_DIP,
+		this.INDEX_FINGER_TIP,
+		this.MIDDLE_FINGER_MCP,
+		this.MIDDLE_FINGER_PIP,
+		this.MIDDLE_FINGER_DIP,
+		this.MIDDLE_FINGER_TIP,
+		this.RING_FINGER_MCP,
+		this.RING_FINGER_PIP,
+		this.RING_FINGER_DIP,
+		this.RING_FINGER_TIP,
+		this.PINKY_MCP,
+		this.PINKY_PIP,
+		this.PINKY_DIP,
+		this.PINKY_TIP,
+	];
+
 }

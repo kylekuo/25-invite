@@ -3,7 +3,7 @@ import HandLandmarks from "./handLandmarks";
 const debug = false;
 
 let tipWithoutMiddleFingerIndexes = HandLandmarks.TIPS.filter( (v, i) => v !== HandLandmarks.MIDDLE_FINGER_TIP ),
-		pipWithoutPinkyFingerIndexes = HandLandmarks.PIPS.filter( (v, i) => v !== HandLandmarks.PINKY_PIP );
+		tipWithoutThumbIndexes = HandLandmarks.PIPS.filter( (v, i) => v !== HandLandmarks.THUMB_TIP );
 
 export const customGestureRecognition = landmarks => {
 
@@ -18,17 +18,13 @@ export const customGestureRecognition = landmarks => {
 
 		if ( mfCheckTips.every(v => v > mfCheckDip) ) return 'Middle_Finger';
 
-	// // check for number three
+	// check for pinch
 
-	// 	const ntCheckMcps = landmarks.filter((v, i) => HandLandmarks.MCPS.includes(i)).map(v => v.y),
-	// 				ntCheckMaxMcp = Math.min( ...ntCheckMcps ),
-	// 				ntCheckPips = landmarks.filter((v, i) => pipWithoutPinkyFingerIndexes.includes(i)).map(v => v.y),
-	// 				ntCheckMinPip = Math.max( ...ntCheckPips ),
-	// 				ntCheckTip = landmarks[ HandLandmarks.PINKY_TIP ].y;
+		// const pinchMaxDistance = 0.5,
+		// 			pinchTips = landmarks.filter((v, i) => tipWithoutThumbIndexes.includes(i)).map(v => v.y),
+		// 			thumbTip = landmarks[ HandLandmarks.THUMB_TIP ];		
 
-	// 	if (debug) console.log({ ntCheckPips, ntCheckTip });
-
-	// 	if ( ntCheckMinPip > ntCheckMaxMcp && ntCheckPips.every(v => v < ntCheckTip) ) return 'Number_Three';
+		// if (debug) console.log({ pinchTips, thumbTip });
 
 	return 'None';
 
