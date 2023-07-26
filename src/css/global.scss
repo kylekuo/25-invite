@@ -48,6 +48,10 @@ a {
 	font-family: sans-serif;
 	background-color: var(--c-black);
 	color: var(--c-white);
+
+	html.ready & {
+		opacity: 1 !important;
+	}
 }
 
 @keyframes spin {
@@ -201,6 +205,8 @@ a {
 
 	display: grid;
 	place-items: center;
+
+	z-index: 1;
 	
 	video {
 		width: 75%;
@@ -240,6 +246,8 @@ a {
 	flex-direction: row;
 	justify-content: flex-end;
 	padding: 10px;
+
+	z-index: 9;
 	
 	html.no-user-media & {
 		display: none;
@@ -295,13 +303,34 @@ a {
 	}
 }
 
-#output {
+#reactions {
 	position: absolute;
 	top: 0; 
 	left: 0;
 	width: 100%;
 	height: 100%;
 
-	display: grid;
-	place-items: center;
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+	gap: 10px;
+
+	padding: 10px;
+
+	& > * {
+		transform: translateY(10px);
+		opacity: 0;
+		transition: all .15s ease-out;
+	}
+	
+	html[gestures*="Open_Palm"] & > .open-palm,
+	html[gestures*="Pointing_Up"] & > .pointing-up,
+	html[gestures*="Thumb_Up"] & > .thumb-up,
+	html[gestures*="Thumb_Down"] & > .thumb-down,
+	html[gestures*="Closed_Fist"] & > .closed-fist,
+	html[gestures*="Victory"] & > .victory,
+	html[gestures*="Middle_Finger"] & > .middle-finger{
+		transform: translateY(0);
+		opacity: 1;
+	}
 }

@@ -109,24 +109,29 @@ await ready();
 
 	function handleGestureChange () {
 
-		const lastTwoDiffHands = Object.values( gestureHistory.items.at(-1) ),
-					lastTwoLeft = [ gestureHistory.items.at(-1)?.left, gestureHistory.items.at(-2)?.left ],
-					lastTwoRight = [ gestureHistory.items.at(-1)?.right, gestureHistory.items.at(-2)?.right ],
-					checkOrder = [ lastTwoDiffHands, lastTwoLeft, lastTwoRight ];
+		const allGestures = gestureHistory.items.reduce((acc, curr) => { 
+			if (!curr) return acc;
+			if (curr.left) acc.push( curr.left.categoryName ); 
+			if (curr.right) acc.push( curr.right.categoryName ); 
+			return acc;
+		}, []);
 
-		const anyIsMF = lastTwoDiffHands.some(v => v && v.categoryName === 'Middle_Finger');
+		// const lastTwoDiffHands = Object.values( gestureHistory.items.at(-1) ),
+		// 			lastTwoLeft = [ gestureHistory.items.at(-1)?.left, gestureHistory.items.at(-2)?.left ],
+		// 			lastTwoRight = [ gestureHistory.items.at(-1)?.right, gestureHistory.items.at(-2)?.right ],
+		// 			checkOrder = [ lastTwoDiffHands, lastTwoLeft, lastTwoRight ];
 					
-		for (const combination of checkOrder) {
+		// for (const combination of checkOrder) {
 			
-			let categoryNames = combination.map(v => v ? v.categoryName : 'undefined').sort();
+		// 	let categoryNames = combination.map(v => v ? v.categoryName : 'undefined').sort();
 
-			if ( isEqual( categoryNames, [ 'Open_Palm', 'Victory' ] ) ) {
-				console.log('25');
-			}
+		// 	if ( isEqual( categoryNames, [ 'Open_Palm', 'Victory' ] ) ) {
+		// 		console.log('25');
+		// 	}
 
-		}
+		// }
 
-		if (anyIsMF) console.log('middle finger!');
+		html.setAttribute('gestures', allGestures ? allGestures.join(',') : '');
 
 	}
 
@@ -213,14 +218,16 @@ await ready();
 					landmarks, 
 					GestureRecognizer.HAND_CONNECTIONS, 
 					{
-						lineWidth: 5
+						color: '#ffffff',
+						lineWidth: 1
 					}
 				);
 		
 				drawUtils.drawLandmarks(
 					landmarks, 
 					{
-						lineWidth: 2,
+						color: '#ffffff',
+						lineWidth: 10,
 					}
 				);
 
@@ -324,8 +331,6 @@ await ready();
 				y: ((bbox.bottom - bbox.top) / 2) + bbox.top,
 				z: ((bbox.back - bbox.front) / 2) + bbox.front,
 			};
-
-			// console.log(bbox, center);
 			
 			const hand = detections.worldLandmarks[0];
 
