@@ -1,3 +1,9 @@
+@font-face {
+	font-family: 'Tiny';
+	src: url('TINY5x3GX.ttf');
+	font-weight: 0 300;
+}
+
 *,
 *::before,
 *::after{
@@ -7,6 +13,7 @@
 :root {
 	--c-black: oklch(10% 0.04 50);
 	--c-white: oklch(90% 0.01 50);
+	--c-red: oklch(50% 0.2 15);
 }
 
 html {
@@ -18,6 +25,19 @@ html, body {
 	min-width: 100%;
 	height: 100%;
 	min-height: 100%;
+}
+
+a {
+	text-decoration: underline;
+	text-decoration-color: var(--c-red);
+	text-decoration-thickness: 2px;
+	color: inherit;
+	transition: all .15s ease-out;
+	
+	&:hover {
+		text-decoration-color: transparent;
+		color: var(--c-red);
+	}
 }
 
 #app {
@@ -70,6 +90,110 @@ html, body {
 	}
 }
 
+#info-lock {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 20px;
+	
+	text-align: center;
+	text-shadow: 0 0 1px black;
+
+	pointer-events: none;
+	z-index: 999;
+
+	opacity: 1;
+	transition: all 1s ease-out;
+
+	html.unlocked & {
+		opacity: 0;
+	}
+	
+	#command {
+		font-family: 'Tiny';
+		font-size: 2.4rem;
+		line-height: 80%;
+		font-variation-settings: 'wght' 80;
+		text-transform: lowercase;
+	}
+	
+	#hint {
+		font-size: 1.2rem;
+
+		& > * {
+			opacity: 0.5;
+		}
+
+		html.unlock-condition-one & .fa-hand-peace,
+		html.unlock-condition-two & .fa-hand {
+			opacity: 1;
+		}
+	}
+}
+
+#info {
+	--group-width: 360px;
+
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: flex-start;
+	flex-wrap: wrap;
+	gap: 20px;
+
+	padding: 10px;
+
+	font-family: 'Tiny';
+	font-size: 2.4em;
+	line-height: 80%;
+	font-variation-settings: 'wght' 80;
+	text-transform: lowercase;
+
+	z-index: 99;
+
+	opacity: 0;
+	transition: all 1s ease-out;
+
+	html.unlocked & {
+		opacity: 1;
+		pointer-events: all;
+	}
+
+	.info-group {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+
+		width: min( var(--group-width), 100vw );
+		max-width: 100%;
+		overflow: visible;
+		
+		& > * {
+			display: inline-block;
+			margin: 0;
+			overflow: visible;
+		}
+
+		h1, h2 {
+			font-size: 1em;
+			font-variation-settings: 'wght' 160;
+		}
+	}
+}
+
 #video {
 	position: relative;
 	width: 100%;
@@ -79,11 +203,10 @@ html, body {
 	place-items: center;
 	
 	video {
-		width: 100%;
-		height: 100%;
+		width: 75%;
+		height: 75%;
 		object-fit: contain;
-		// visibility: hidden;
-		// opacity: 0.1;
+		opacity: 0.1;
 	}
 
 	canvas {
@@ -93,11 +216,16 @@ html, body {
 		width: 100%;
 		height: 100%;
 		transform: translate(-50%, -50%);
-		opacity: 1;
+		
+		opacity: .5;
 		transition: opacity .15s ease-out;
 
+		html.unlocked & {
+			opacity: 1;
+		}
+
 		html.no-detections & {
-			opacity: 0;
+			opacity: 0 !important;
 		}
 	}
 }
@@ -110,6 +238,7 @@ html, body {
 	
 	display: flex;
 	flex-direction: row;
+	justify-content: flex-end;
 	padding: 10px;
 	
 	html.no-user-media & {

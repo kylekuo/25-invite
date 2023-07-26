@@ -33,6 +33,10 @@ await ready();
 	let width = window.innerWidth,
 			height = window.innerHeight;
 
+	let isLocked = true,
+			unlockConditionOne = false,
+			unlockConditionTwo = false;
+
 // --- MEDIAPIPE --- //
 
 	const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm'),
@@ -48,7 +52,7 @@ await ready();
 
 // --- PREDICTIONS --- //
 
-	let predictionsRunning = false; 
+	let predictionsRunning = false;
 
 	const gestureBuffer = new FixedSizeArray( 5 ),
 				gestureHistory = new FixedSizeArray( 2 ),
@@ -64,6 +68,8 @@ await ready();
 					
 		html.classList.toggle('no-detections', !hasDetections);
 
+		// if (detections.gestures[0]) console.log( detections.gestures[0][0] );
+
 		if ( hasDetections ) {
 			handleDetections( detections );
 			// handle2D( detections );
@@ -71,6 +77,33 @@ await ready();
 		}
 
 		requestAnimationFrame( predictVideo );
+
+	}
+
+	function handleUnlock () {
+
+		let unlockConditionOne = false,
+				unlockConditionTwo = false;
+
+		for (const item of gestureHistory.items) {
+
+			if (!item) continue;
+
+			let gestures = Object.values(item),
+					categoryNames = gestures.map(v => v ? v.categoryName : 'undefined');
+
+			if ( categoryNames.includes('Victory') ) unlockConditionOne = true;
+			if ( categoryNames.includes('Open_Palm') ) unlockConditionTwo = true;
+
+		}
+
+		html.classList.toggle('unlock-condition-one', unlockConditionOne);
+		html.classList.toggle('unlock-condition-two', unlockConditionTwo);
+		
+		if (unlockConditionOne && unlockConditionTwo) {
+			html.classList.add('unlocked');
+			isLocked = false;
+		}
 
 	}
 
@@ -157,6 +190,8 @@ await ready();
 			handleGestureChange();
 		} 
 
+		if (isLocked) handleUnlock();
+
 	}
 
 // --- GRAPHICS --- //
@@ -225,7 +260,7 @@ await ready();
 		const ambientLight = new THREE.AmbientLight( 0xfff, 1000 );
 		scene.add( ambientLight );
 
-		const sphereGeo = new THREE.SphereGeometry( 0.25, 10, 10 ),
+		const sphereGeo = new THREE.SphereGeometry( 0.5, 10, 10 ),
 					sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }),
 					spheres = new THREE.Group();
 
@@ -343,9 +378,8 @@ await ready();
 
 // --- INIT --- //
 
-	let stream = null;
-
-	let useCamera = false;
+	let stream = null,
+			useCamera = false;
 	
 	const useCameraCheck = app.querySelector('#use-camera');
 	useCameraCheck.checked = false;
@@ -353,12 +387,13 @@ await ready();
 	switchVideoSource();
 	useCameraCheck.onchange = evt => {
 		const { checked } = evt.target;
-		console.log('useCameraCheck', checked);
 		useCamera = checked;
 		switchVideoSource();
 	}
 
 	function switchVideoSource () {
+
+		html.classList.remove('unlock-condition-one', 'unlock-condition-two');
 
 		html.classList.add('loading');
 		predictionsRunning = false;
