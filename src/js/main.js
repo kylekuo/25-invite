@@ -42,7 +42,7 @@ await ready();
 	const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm'),
 				recognizer = await GestureRecognizer.createFromOptions(vision, {
 					baseOptions: {
-						modelAssetPath: '/models/gesture_recognizer.task',
+						modelAssetPath: 'https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/gesture_recognizer.task',
 					},
 					runningMode: 'VIDEO',	
 					numHands: 2
