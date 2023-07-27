@@ -15,7 +15,7 @@ import * as THREE from 'three';
 import HandLandmarks from './handLandmarks';
 import HandConnections from './handConnections';
 
-const debug = true;
+const debug = false;
 
 await ready();
 
@@ -42,13 +42,13 @@ await ready();
 	const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm'),
 				recognizer = await GestureRecognizer.createFromOptions(vision, {
 					baseOptions: {
-						modelAssetPath: 'src/shared/models/gesture_recognizer.task',
+						modelAssetPath: '/models/gesture_recognizer.task',
 					},
 					runningMode: 'VIDEO',	
 					numHands: 2
 				});
 
-	console.log({ vision, recognizer });
+	if (debug) console.debug({ vision, recognizer });
 
 // --- PREDICTIONS --- //
 
@@ -82,8 +82,8 @@ await ready();
 
 	function handleUnlock () {
 
-		let unlockConditionOne = false,
-				unlockConditionTwo = false;
+		unlockConditionOne = false;
+		unlockConditionTwo = false;
 
 		for (const item of gestureHistory.items) {
 

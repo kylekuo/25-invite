@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'Tiny';
-	src: url('TINY5x3GX.ttf');
+	src: url('/TINY5x3GX.ttf');
 	font-weight: 0 300;
 }
 
@@ -155,7 +155,7 @@ a {
 	justify-content: flex-start;
 	align-items: flex-start;
 	flex-wrap: wrap;
-	gap: 20px;
+	gap: 50px;
 
 	padding: 10px;
 
@@ -180,15 +180,26 @@ a {
 		flex-direction: column;
 		justify-content: flex-start;
 		align-items: flex-start;
+		gap: 15px;
 
 		width: min( var(--group-width), 100vw );
 		max-width: 100%;
 		overflow: visible;
 		
+		&.dev {
+			font-size: 0.5em;
+
+			& > * {
+				margin-top: -0.85rem;
+				margin-bottom: -0.25rem;
+			}
+		}
+		
 		& > * {
 			display: inline-block;
-			margin: 0;
 			overflow: visible;
+			margin-top: -0.85rem;
+			margin-bottom: 0.35rem;
 		}
 
 		h1, h2 {
@@ -305,17 +316,30 @@ a {
 
 #reactions {
 	position: absolute;
-	top: 0; 
+	bottom: 0; 
 	left: 0;
-	width: 100%;
-	height: 100%;
+	width: auto;
+	height: auto;
 
-	display: flex;
+	display: inline-flex;
 	justify-content: center;
 	align-items: flex-end;
 	gap: 10px;
 
-	padding: 10px;
+	padding: 10px 20px;
+	border-width: 1px 1px 0 0;
+	border-style: solid;
+	border-color: var(--c-white);
+	border-top-right-radius: 10px;
+
+	transform: translateX(0) translateY(0);
+	opacity: 1;
+	transition: all .15s ease-out;
+	
+	html.no-detections & {
+		transform: translateX(-10px) translateY(10px);
+		opacity: 0;
+	}
 
 	& > * {
 		transform: translateY(10px);
