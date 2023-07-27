@@ -1,10 +1,8 @@
-import basicSsl from '@vitejs/plugin-basic-ssl';
+import { defineConfig } from 'vite';
 
-export default {
+export default defineConfig({
+	base: '/25-invite/',
 	build: {
 		target: 'esnext'
-	},
-	plugins: [
-    basicSsl()
-  ]
-}
+	}
+});
