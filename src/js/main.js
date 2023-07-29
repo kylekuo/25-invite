@@ -59,7 +59,7 @@ await ready();
 	let predictionsRunning = false;
 
 	const gestureBuffer = new FixedSizeArray( 5 ),
-				gestureHistory = new FixedSizeArray( 2 ),
+				gestureHistory = new FixedSizeArray( 3 ),
 				video = app.querySelector('video');
 
 	function predictVideo () {
