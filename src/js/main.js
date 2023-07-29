@@ -272,7 +272,7 @@ await ready();
 		scene.add( ambientLight );
 
 		const sphereGeo = new THREE.SphereGeometry( 0.5, 10, 10 ),
-					sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }),
+					sphereMaterial = new THREE.MeshNormalMaterial(),
 					spheres = new THREE.Group();
 
 		for (const landmark of HandLandmarks.ALL.entries()) {
@@ -402,6 +402,11 @@ await ready();
 
 	function switchVideoSource () {
 
+		gestureHistory.push({ left: null, right: null });
+		gestureHistory.push({ left: null, right: null });
+		
+		unlockConditionOne = false,
+		unlockConditionTwo = false;
 		html.classList.remove('unlock-condition-one', 'unlock-condition-two');
 
 		html.classList.add('loading');
