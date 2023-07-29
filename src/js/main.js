@@ -39,6 +39,8 @@ await ready();
 
 // --- MEDIAPIPE --- //
 
+	html.classList.add('loading-ml');
+
 	const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm'),
 				recognizer = await GestureRecognizer.createFromOptions(vision, {
 					baseOptions: {
@@ -47,6 +49,8 @@ await ready();
 					runningMode: 'VIDEO',	
 					numHands: 2
 				});
+
+	html.classList.remove('loading-ml');
 
 	if (debug) console.debug({ vision, recognizer });
 
@@ -401,6 +405,7 @@ await ready();
 		html.classList.remove('unlock-condition-one', 'unlock-condition-two');
 
 		html.classList.add('loading');
+		html.classList.add('loading-video');
 		predictionsRunning = false;
 		video.pause();
 
@@ -437,6 +442,7 @@ await ready();
 			predictionsRunning = true;
 			predictVideo();
 			html.classList.remove('loading');
+			html.classList.remove('loading-video');
 		}
 
 	}
