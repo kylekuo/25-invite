@@ -340,7 +340,7 @@ await ready();
 
 			for (const [index, mesh] of spheres.children.entries()) {
 				let pos = hand[index];
-				mesh.position.set( pos.x, -pos.y, pos.z );
+				mesh.position.set( -pos.x, -pos.y, pos.z );
 				mesh.position.multiplyScalar( 100 );
 			}
 
@@ -460,8 +460,11 @@ await ready();
 	
 	function initWithoutStream () {
 		
+		video.crossOrigin = 'anonymous';
 		video.loop = true;
 		video.muted = true;
+		video.playsInline = true;
+		video.preload = 'auto';
 
 		video.srcObject = null;
 		video.src = 'video.mp4';
