@@ -120,21 +120,6 @@ await ready();
 			return acc;
 		}, []);
 
-		// const lastTwoDiffHands = Object.values( gestureHistory.items.at(-1) ),
-		// 			lastTwoLeft = [ gestureHistory.items.at(-1)?.left, gestureHistory.items.at(-2)?.left ],
-		// 			lastTwoRight = [ gestureHistory.items.at(-1)?.right, gestureHistory.items.at(-2)?.right ],
-		// 			checkOrder = [ lastTwoDiffHands, lastTwoLeft, lastTwoRight ];
-					
-		// for (const combination of checkOrder) {
-			
-		// 	let categoryNames = combination.map(v => v ? v.categoryName : 'undefined').sort();
-
-		// 	if ( isEqual( categoryNames, [ 'Open_Palm', 'Victory' ] ) ) {
-		// 		console.log('25');
-		// 	}
-
-		// }
-
 		html.setAttribute('gestures', allGestures ? allGestures.join(',') : '');
 
 	}
@@ -402,8 +387,9 @@ await ready();
 
 	function switchVideoSource () {
 
-		gestureHistory.push({ left: null, right: null });
-		gestureHistory.push({ left: null, right: null });
+		for (let i = 0; i < gestureHistory.items.length; i++) {
+			gestureHistory.push({ left: null, right: null });
+		}
 		
 		unlockConditionOne = false,
 		unlockConditionTwo = false;
